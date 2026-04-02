@@ -7,6 +7,7 @@ import { signInWithEmailAndPassword, onAuthStateChanged, signOut, User } from 'f
 import { collection, addDoc, getDocs, query, orderBy } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import imageCompression from 'browser-image-compression';
+import Logo from '@/components/Logo'; // 新增這行
 
 export default function AdminDashboard() {
   const [user, setUser] = useState<User | null>(null);
@@ -131,10 +132,17 @@ export default function AdminDashboard() {
     <div className="min-h-screen bg-neutral-950 text-neutral-200 p-6 md:p-12">
       <div className="max-w-6xl mx-auto">
         <header className="flex justify-between items-center mb-12 border-b border-neutral-800 pb-6">
-          <h1 className="text-3xl font-light tracking-widest uppercase">Feeling Studio Admin</h1>
+          <div className="flex items-center gap-4">
+            {/* 放置我們做好的 Logo */}
+            <Logo />
+            {/* 後台標記 */}
+            <span className="text-sm font-light tracking-widest text-yellow-600 bg-yellow-950 px-3 py-1 rounded-sm">
+                SYSTEM ADMIN
+            </span>
+          </div>
           <div className="flex items-center gap-6">
-            <span className="text-neutral-500 text-sm">{user.email}</span>
-            <button onClick={handleLogout} className="text-sm border border-neutral-700 px-4 py-2 hover:bg-neutral-800 transition">
+            <span className="text-neutral-500 text-sm font-light">{user.email}</span>
+            <button onClick={handleLogout} className="text-sm border border-neutral-700 px-4 py-2 hover:bg-neutral-800 transition rounded-sm">
               登出
             </button>
           </div>
