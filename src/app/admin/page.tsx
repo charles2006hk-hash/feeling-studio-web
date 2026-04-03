@@ -23,7 +23,7 @@ export default function AdminDashboard() {
   // ==========================================
   //  狀態區：作品集 (Portfolio) 與 詢問單
   // ==========================================
-  const initialFormState = { title: '', category: '01', description: '' };
+  const initialFormState = { title: '', category: '01', description: '', isServiceFeatured: false };
   const [uploadData, setUploadData] = useState(initialFormState);
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [isUploading, setIsUploading] = useState(false);
@@ -130,6 +130,7 @@ export default function AdminDashboard() {
         title: uploadData.title,
         category: uploadData.category,
         description: uploadData.description,
+        isServiceFeatured: uploadData.isServiceFeatured,
         imageUrl: finalImageUrl,
         updatedAt: new Date(),
       };
@@ -162,7 +163,8 @@ export default function AdminDashboard() {
     setUploadData({
         title: item.title,
         category: item.category,
-        description: item.description || ''
+        description: item.description || '',
+        isServiceFeatured: item.isServiceFeatured || false
     });
     setOldImageUrl(item.imageUrl);
     setUploadMsg(`正在編輯作品：${item.title}`);
@@ -370,10 +372,25 @@ export default function AdminDashboard() {
                         </div>
                     )}
 
-                    {uploadMsg && <p className="text-sm text-yellow-500 font-light bg-yellow-950/30 p-3 rounded-sm">{uploadMsg}</p>}
+                    {/* ✅ 將打勾選項加在這裡！(圖片上傳/預覽的下方) */}
+                    <div className="flex items-center gap-3 bg-neutral-950 p-4 border border-neutral-800 rounded-sm mt-4">
+                      <input 
+                        type="checkbox" 
+                        id="isFeatured"
+                        className="w-4 h-4 accent-yellow-700 cursor-pointer"
+                        checked={uploadData.isServiceFeatured || false}
+                        onChange={e => setUploadData({...uploadData, isServiceFeatured: e.target.checked})}
+                      />
+                      <label htmlFor="isFeatured" className="text-sm text-neutral-300 font-light cursor-pointer">
+                        將此作品設為該業務頁面的「精選展示 (Featured Sample)」
+                      </label>
+                    </div>
+
+                    {/* 下面是原本的錯誤訊息和送出按鈕 */}
+                    {uploadMsg && <p className="text-sm text-yellow-500 font-light bg-yellow-950/30 p-3 rounded-sm mt-4">{uploadMsg}</p>}
 
                     <button type="submit" disabled={isUploading} 
-                        className="w-full bg-neutral-100 text-black py-4 hover:bg-neutral-300 transition disabled:opacity-50 tracking-widest text-sm font-medium rounded-sm">
+                        className="w-full bg-neutral-100 text-black py-4 mt-6 hover:bg-neutral-300 transition disabled:opacity-50 tracking-widest text-sm font-medium rounded-sm">
                         {isUploading ? '處理中...' : editingItemId ? '壓縮並更新作品' : '壓縮並發佈作品'}
                     </button>
                     </form>
