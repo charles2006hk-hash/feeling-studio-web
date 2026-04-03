@@ -49,7 +49,11 @@ export default function ServiceDetailPage() {
         }
 
         // 2. 抓取該類別的作品 Sample (portfolio 中 category == id)
-        const q = query(collection(db, 'portfolio'), where('category', '==', categoryId));
+        const q = query(
+          collection(db, 'portfolio'), 
+          where('category', '==', categoryId),
+          where('isServiceFeatured', '==', true) // ✅ 關鍵修改
+        );
         const sampleSnap = await getDocs(q);
         setSamples(sampleSnap.docs.map(d => ({ id: d.id, ...d.data() })));
         
