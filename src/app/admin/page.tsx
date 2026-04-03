@@ -316,7 +316,7 @@ export default function AdminDashboard() {
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
             
                 {/* 左側：上傳/編輯作品表單 */}
-                <section className="bg-neutral-900 p-8 border border-neutral-800 rounded-sm lg:col-span-1 self-start sticky top-6">
+                <section className="bg-neutral-900 p-8 border border-neutral-800 rounded-sm lg:col-span-1 self-start relative z-20 lg:sticky lg:top-6">
                     <div className="flex justify-between items-center mb-8">
                         <h2 className="text-xl font-light tracking-widest uppercase border-l-2 border-white pl-4 text-white">
                             {editingItemId ? '更新作品' : '發佈新作品'}
