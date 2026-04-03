@@ -143,6 +143,12 @@ export default function Home() {
             <p>Mak 老師專精於大型拍賣行的中大型藝術品（如畫作、墨寶、陶瓷、珠寶）拍攝，能精準捕捉文物獨有的歷史厚度與材質紋理。同時致力於專業人像與風景創作。</p>
             <p className="border-l-2 border-neutral-700 pl-6 italic text-neutral-500">「攝影不僅是紀錄，更是對靈魂與美學的深刻洞察。」</p>
             <p>近年更積極探索 AI 視覺藝術創作，將傳統攝影美學與前沿科技完美融合，持續拓展視覺表達的邊界。</p>
+            {/* 加入這顆按鈕 */}
+            <div className="pt-4">
+              <Link href="/about" className="inline-block text-sm tracking-widest text-neutral-100 border border-neutral-700 px-8 py-3 hover:bg-white hover:text-black transition-colors duration-300 uppercase">
+                Read Full Story
+              </Link>
+            </div>
           </div>
         </div>
       </section>
