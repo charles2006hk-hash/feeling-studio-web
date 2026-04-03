@@ -230,11 +230,15 @@ export default function Home() {
               請填寫右方表單，簡述您的拍攝需求（如類別、大概時間與地點），我們將會由專人盡快與您聯繫。您亦可透過下方行動條碼直接使用微信或 WhatsApp 與我們對話。
             </p>
             <div className="flex space-x-6 mb-12">
-              <div className="w-32 h-32 bg-neutral-900 flex items-center justify-center text-neutral-600 text-sm border border-neutral-800 shadow-lg rounded-sm font-light">
-                [ WeChat QR ]
-              </div>
-              <div className="w-32 h-32 bg-neutral-900 flex items-center justify-center text-neutral-600 text-sm border border-neutral-800 shadow-lg rounded-sm font-light">
-                [ WhatsApp QR ]
+              <div className="relative w-72 h-36"> {/* 容器大小已調整以適應 cropped 圖片比例 */}
+                <Image 
+                  src="/images/qrcodes_cropped.png" // ✅ 使用你手動裁切後的圖片
+                  alt="Feeling Studio WeChat & WhatsApp scannable QR Codes"
+                  fill
+                  sizes="(max-width: 768px) 100vw, 50vw"
+                  className="object-contain" // ✅ 確保cropped圖片等比例適應容器
+                  priority 
+                />
               </div>
             </div>
             <div className="space-y-2 border-l-2 border-neutral-800 pl-6">
