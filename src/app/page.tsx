@@ -100,18 +100,23 @@ export default function Home() {
         </div>
       </section>
 
-      {/* 創始人簡介 */}
+      {/* ==========================================
+          創始人簡介 (About Mak)
+         ========================================== */}
       <section className="max-w-6xl mx-auto py-32 px-6 grid md:grid-cols-2 gap-16 items-center">
+        {/* 相片容器 */}
         <div className="relative h-[550px] bg-neutral-900 overflow-hidden shadow-2xl border border-neutral-800 group rounded-sm">
           <Image 
-            src="/images/mak.jpg" 
-            alt="Mak - Founder of Feeling Studio" 
+            src="/images/hero-reflection.jpg" // ✅ 修復：更換為後視鏡反射相片
+            alt="Mak - Reflection with camera in car side mirror" 
             fill
             sizes="(max-width: 768px) 100vw, 50vw"
-            className="object-cover object-center transition duration-1000 ease-in-out group-hover:scale-105 grayscale hover:grayscale-0"
+            // ✅ 優化：這裡建議移除 grayscale，保留這張圖原本的藍色色調，看起來更有質感
+            className="object-cover object-center transition duration-1000 ease-in-out group-hover:scale-105"
             priority 
           />
-          <div className="absolute inset-0 bg-black/20 transition-opacity duration-700 group-hover:opacity-0 z-10" />
+          {/* 藝術光影遮罩 - 保留以維持整體氛圍 */}
+          <div className="absolute inset-0 bg-black/10 transition-opacity duration-700 group-hover:opacity-0 z-10" />
         </div>
         
         <div className="space-y-8">
