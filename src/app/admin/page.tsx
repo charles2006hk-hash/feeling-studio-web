@@ -11,18 +11,13 @@ import { ref, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage
 import imageCompression from 'browser-image-compression';
 
 export default function AdminDashboard() {
-  // --- 登入狀態 ---
   const [user, setUser] = useState<User | null>(null);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loginError, setLoginError] = useState('');
 
-  // --- 後台頁籤狀態 ---
   const [activeTab, setActiveTab] = useState<'portfolio' | 'services'>('portfolio');
 
-  // ==========================================
-  //  狀態區：作品集 (Portfolio) 與 詢問單
-  // ==========================================
   const initialFormState = { title: '', category: '01', description: '', isServiceFeatured: false };
   const [uploadData, setUploadData] = useState(initialFormState);
   const [imageFile, setImageFile] = useState<File | null>(null);
@@ -35,14 +30,10 @@ export default function AdminDashboard() {
   const [inquiries, setInquiries] = useState<any[]>([]);
   const [portfolioItems, setPortfolioItems] = useState<any[]>([]);
 
-  // ==========================================
-  //  狀態區：服務與報價設定 (Services)
-  // ==========================================
   const [editingServiceId, setEditingServiceId] = useState('01');
   const [serviceData, setServiceData] = useState({ title: '', introduction: '', process: '', priceBase: '' });
   const [isSavingService, setIsSavingService] = useState(false);
 
-  // --- 初始化監聽 ---
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       setUser(currentUser);
@@ -54,7 +45,6 @@ export default function AdminDashboard() {
     return () => unsubscribe();
   }, []);
 
-  // --- 登入與登出 ---
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
@@ -67,13 +57,34 @@ export default function AdminDashboard() {
 
   const handleLogout = () => signOut(auth);
 
-  // ==========================================
-  //  功能邏輯：作品集與詢問單
-  // ==========================================
   const fetchInquiries = async () => {
     const q = query(collection(db, 'inquiries'), orderBy('createdAt', 'desc'));
     const snapshot = await getDocs(q);
     setInquiries(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+  };
+
+  // ✅ 新增：切換詢問單狀態 (待處理 / 已跟進)
+  const handleToggleInquiryStatus = async (id: string, currentStatus: string) => {
+    try {
+      const newStatus = currentStatus === 'completed' ? 'pending' : 'completed';
+      await updateDoc(doc(db, 'inquiries', id), { status: newStatus });
+      fetchInquiries(); // 重新整理列表
+    } catch (error) {
+      console.error("Error updating status:", error);
+      alert("狀態更新失敗，請檢查權限。");
+    }
+  };
+
+  // ✅ 新增：刪除詢問單
+  const handleDeleteInquiry = async (id: string, name: string) => {
+    if (!window.confirm(`確定要永久刪除來自「${name}」的詢問單嗎？此操作無法還原。`)) return;
+    try {
+      await deleteDoc(doc(db, 'inquiries', id));
+      fetchInquiries(); // 重新整理列表
+    } catch (error) {
+      console.error("Error deleting inquiry:", error);
+      alert("刪除失敗，請檢查權限。");
+    }
   };
 
   const fetchPortfolio = async () => {
@@ -111,7 +122,6 @@ export default function AdminDashboard() {
         await uploadBytes(storageRef, compressedFile);
         finalImageUrl = await getDownloadURL(storageRef);
 
-        // 如果是編輯模式且有新圖片，刪除舊圖片
         if (editingItemId && oldImageUrl) {
             try {
                 const decodedUrl = decodeURIComponent(oldImageUrl);
@@ -212,9 +222,6 @@ export default function AdminDashboard() {
     setUploadMsg('');
   };
 
-  // ==========================================
-  //  功能邏輯：服務與報價設定
-  // ==========================================
   const fetchServiceData = async (id: string) => {
     setEditingServiceId(id);
     const docRef = doc(db, 'services', id);
@@ -223,7 +230,6 @@ export default function AdminDashboard() {
     if (docSnap.exists()) {
       setServiceData(docSnap.data() as any);
     } else {
-      // 預設空值
       setServiceData({ 
         title: '', 
         introduction: '', 
@@ -252,7 +258,6 @@ export default function AdminDashboard() {
     '04': '婚禮/活動', '05': '企業形象', '06': '建築空間'
   };
 
-  // ---------------- 如果未登入，顯示登入介面 ----------------
   if (!user) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-neutral-950 p-4">
@@ -278,7 +283,6 @@ export default function AdminDashboard() {
     );
   }
 
-  // ---------------- 登入後的 Admin 儀表板 ----------------
   return (
     <div className="min-h-screen bg-neutral-950 text-neutral-200 p-6 md:p-12 font-sans pb-32">
       <div className="max-w-[1600px] mx-auto">
@@ -297,7 +301,6 @@ export default function AdminDashboard() {
           </div>
         </header>
 
-        {/* 頁籤切換 */}
         <div className="flex gap-8 mb-8 border-b border-neutral-800">
             <button 
                 onClick={() => setActiveTab('portfolio')}
@@ -312,11 +315,9 @@ export default function AdminDashboard() {
         </div>
 
         {activeTab === 'portfolio' ? (
-            /* ================== Tab 1: 作品與詢問單 ================== */
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
             
-                {/* 左側：上傳/編輯作品表單 */}
-                <section className="bg-neutral-900 p-8 border border-neutral-800 rounded-sm lg:col-span-1 self-start relative z-20 lg:sticky lg:top-6">
+                <section className="bg-neutral-900 p-8 border border-neutral-800 rounded-sm lg:col-span-1 relative z-20 lg:sticky lg:top-6 self-start">
                     <div className="flex justify-between items-center mb-8">
                         <h2 className="text-xl font-light tracking-widest uppercase border-l-2 border-white pl-4 text-white">
                             {editingItemId ? '更新作品' : '發佈新作品'}
@@ -362,7 +363,6 @@ export default function AdminDashboard() {
                         onChange={e => setImageFile(e.target.files ? e.target.files[0] : null)} />
                     </div>
 
-                    {/* 編輯模式下的舊圖預覽 */}
                     {editingItemId && oldImageUrl && !imageFile && (
                         <div className="mt-4 border border-neutral-800 p-2 rounded-sm bg-neutral-950">
                             <p className="text-xs text-neutral-600 mb-2 font-light">目前圖片預覽：</p>
@@ -372,7 +372,6 @@ export default function AdminDashboard() {
                         </div>
                     )}
 
-                    {/* ✅ 將打勾選項加在這裡！(圖片上傳/預覽的下方) */}
                     <div className="flex items-center gap-3 bg-neutral-950 p-4 border border-neutral-800 rounded-sm mt-4">
                       <input 
                         type="checkbox" 
@@ -386,19 +385,17 @@ export default function AdminDashboard() {
                       </label>
                     </div>
 
-                    {/* 下面是原本的錯誤訊息和送出按鈕 */}
-                    {uploadMsg && <p className="text-sm text-yellow-500 font-light bg-yellow-950/30 p-3 rounded-sm mt-4">{uploadMsg}</p>}
+                    {uploadMsg && <p className="text-sm text-yellow-500 font-light bg-yellow-950/30 p-3 rounded-sm">{uploadMsg}</p>}
 
                     <button type="submit" disabled={isUploading} 
-                        className="w-full bg-neutral-100 text-black py-4 mt-6 hover:bg-neutral-300 transition disabled:opacity-50 tracking-widest text-sm font-medium rounded-sm">
+                        className="w-full bg-neutral-100 text-black py-4 hover:bg-neutral-300 transition disabled:opacity-50 tracking-widest text-sm font-medium rounded-sm">
                         {isUploading ? '處理中...' : editingItemId ? '壓縮並更新作品' : '壓縮並發佈作品'}
                     </button>
                     </form>
                 </section>
 
-                {/* 右側：客戶詢問單 & 作品管理 */}
                 <div className="lg:col-span-2 space-y-10">
-                    {/* 詢問單 */}
+                    {/* ✅ 詢問單管理區塊 (更新狀態與刪除按鈕) */}
                     <section className="bg-neutral-900 p-8 border border-neutral-800 rounded-sm flex flex-col h-[500px]">
                         <div className="flex justify-between items-center mb-8 border-l-2 border-white pl-4">
                             <h2 className="text-xl font-light tracking-widest uppercase text-white">客戶詢問單</h2>
@@ -409,23 +406,45 @@ export default function AdminDashboard() {
                                 <p className="text-neutral-600 text-center py-10">目前尚無詢問紀錄。</p>
                             ) : (
                                 inquiries.map((inq) => (
-                                <div key={inq.id} className="bg-neutral-950 p-5 border border-neutral-800 rounded-sm">
+                                <div key={inq.id} className={`bg-neutral-950 p-5 border rounded-sm transition-all ${inq.status === 'completed' ? 'border-emerald-900/50 opacity-60' : 'border-neutral-800'}`}>
                                     <div className="flex justify-between items-start mb-3">
-                                    <h3 className="font-medium text-neutral-100 text-base">{inq.name}</h3>
-                                    <span className="text-xs text-neutral-600">
-                                        {inq.createdAt?.toDate ? inq.createdAt.toDate().toLocaleDateString('zh-HK') : '剛剛'}
-                                    </span>
+                                      <div>
+                                        <h3 className="font-medium text-neutral-100 text-base inline-block">{inq.name}</h3>
+                                        {/* 狀態標籤 */}
+                                        <span className={`ml-3 text-[10px] px-2 py-1 rounded-sm uppercase tracking-wider ${inq.status === 'completed' ? 'bg-emerald-900/30 text-emerald-500' : 'bg-yellow-900/30 text-yellow-500'}`}>
+                                          {inq.status === 'completed' ? '✓ 已跟進' : '待處理'}
+                                        </span>
+                                      </div>
+                                      <span className="text-xs text-neutral-600">
+                                          {inq.createdAt?.toDate ? inq.createdAt.toDate().toLocaleDateString('zh-HK') : '剛剛'}
+                                      </span>
                                     </div>
                                     <p className="text-neutral-400 mb-1">聯絡方式：{inq.contact}</p>
                                     <p className="text-yellow-600 mb-3">需要攝影：{inq.category}</p>
                                     <p className="text-neutral-300 font-light bg-neutral-900 p-4 rounded-sm leading-relaxed">{inq.details}</p>
+                                    
+                                    {/* 操作按鈕 */}
+                                    <div className="flex gap-4 mt-4 pt-4 border-t border-neutral-800/50 text-xs">
+                                      <button 
+                                        onClick={() => handleToggleInquiryStatus(inq.id, inq.status)}
+                                        className={`${inq.status === 'completed' ? 'text-neutral-500 hover:text-white' : 'text-emerald-500 hover:text-emerald-400'} transition-colors`}
+                                      >
+                                        {inq.status === 'completed' ? '標示為「待處理」' : '標示為「已跟進」'}
+                                      </button>
+                                      <span className="text-neutral-800">|</span>
+                                      <button 
+                                        onClick={() => handleDeleteInquiry(inq.id, inq.name)}
+                                        className="text-red-900 hover:text-red-500 transition-colors"
+                                      >
+                                        刪除紀錄
+                                      </button>
+                                    </div>
                                 </div>
                                 ))
                             )}
                         </div>
                     </section>
 
-                    {/* 已發佈作品管理 */}
                     <section className="bg-neutral-900 p-8 border border-neutral-800 rounded-sm flex flex-col h-[500px]">
                         <div className="flex justify-between items-center mb-8 border-l-2 border-white pl-4">
                             <h2 className="text-xl font-light tracking-widest uppercase text-white">作品管理系統</h2>
@@ -469,7 +488,6 @@ export default function AdminDashboard() {
                 </div>
             </div>
         ) : (
-            /* ================== Tab 2: 服務與報價設定 ================== */
             <section className="bg-neutral-900 p-8 md:p-12 border border-neutral-800 rounded-sm max-w-5xl">
                 <div className="flex gap-3 mb-10 overflow-x-auto pb-4 scrollbar-thin">
                     {['01', '02', '03', '04', '05', '06'].map(id => (
