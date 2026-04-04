@@ -15,19 +15,18 @@ export default function InquiryForm() {
   
   const [status, setStatus] = useState<'idle'|'submitting'|'success'|'error'>('idle');
 
-  // ✅ 防機器人驗證碼狀態
+  // 防機器人驗證碼狀態
   const [captcha, setCaptcha] = useState({ num1: 0, num2: 0 });
   const [userAnswer, setUserAnswer] = useState('');
   const [captchaError, setCaptchaError] = useState(false);
 
-  // 載入時產生隨機數學題
   useEffect(() => {
     generateCaptcha();
   }, []);
 
   const generateCaptcha = () => {
     setCaptcha({
-      num1: Math.floor(Math.random() * 10) + 1, // 1~10 的隨機數
+      num1: Math.floor(Math.random() * 10) + 1,
       num2: Math.floor(Math.random() * 10) + 1
     });
     setUserAnswer('');
@@ -37,24 +36,21 @@ export default function InquiryForm() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    // ✅ 驗證防機器人答案
     if (parseInt(userAnswer) !== captcha.num1 + captcha.num2) {
       setCaptchaError(true);
-      return; // 答案錯誤，停止發送
+      return;
     }
 
     setStatus('submitting');
     setCaptchaError(false);
     
     try {
-      // 1. 將資料寫入 Firestore
       await addDoc(collection(db, 'inquiries'), {
         ...formData,
         status: 'pending',
         createdAt: new Date()
       });
 
-      // 2. 呼叫 API 發送 Email 提醒 (若您有按照上一步設定 Resend 的話)
       await fetch('/api/send', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -63,7 +59,7 @@ export default function InquiryForm() {
       
       setStatus('success');
       setFormData({ name: '', contact: '', category: '藝術品/商品拍攝', details: '' });
-      generateCaptcha(); // 成功後重置驗證碼
+      generateCaptcha();
       
       setTimeout(() => setStatus('idle'), 3000);
     } catch (error) {
@@ -78,7 +74,8 @@ export default function InquiryForm() {
         <label className="block text-sm text-neutral-400 mb-2">私人或公司名稱</label>
         <input 
           type="text" required
-          className="w-full bg-neutral-900 border border-neutral-700 p-3 focus:outline-none focus:border-white transition-colors"
+          // ✅ 修復：加入了 text-white
+          className="w-full bg-neutral-900 border border-neutral-700 p-3 text-white focus:outline-none focus:border-white transition-colors"
           value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})}
         />
       </div>
@@ -86,14 +83,16 @@ export default function InquiryForm() {
         <label className="block text-sm text-neutral-400 mb-2">聯絡電話或 Email</label>
         <input 
           type="text" required
-          className="w-full bg-neutral-900 border border-neutral-700 p-3 focus:outline-none focus:border-white transition-colors"
+          // ✅ 修復：加入了 text-white
+          className="w-full bg-neutral-900 border border-neutral-700 p-3 text-white focus:outline-none focus:border-white transition-colors"
           value={formData.contact} onChange={e => setFormData({...formData, contact: e.target.value})}
         />
       </div>
       <div>
         <label className="block text-sm text-neutral-400 mb-2">需要攝影的類別</label>
         <select 
-          className="w-full bg-neutral-900 border border-neutral-700 p-3 focus:outline-none focus:border-white transition-colors text-neutral-200 appearance-none"
+          // ✅ 修復：加入了 text-white
+          className="w-full bg-neutral-900 border border-neutral-700 p-3 text-white focus:outline-none focus:border-white transition-colors appearance-none"
           value={formData.category} 
           onChange={e => setFormData({...formData, category: e.target.value})}
         >
@@ -110,22 +109,23 @@ export default function InquiryForm() {
         <label className="block text-sm text-neutral-400 mb-2">大概要求與細節</label>
         <textarea 
           rows={4} required
-          className="w-full bg-neutral-900 border border-neutral-700 p-3 focus:outline-none focus:border-white transition-colors resize-none"
+          // ✅ 修復：加入了 text-white
+          className="w-full bg-neutral-900 border border-neutral-700 p-3 text-white focus:outline-none focus:border-white transition-colors resize-none"
           value={formData.details} onChange={e => setFormData({...formData, details: e.target.value})}
         ></textarea>
       </div>
 
-      {/* ✅ 新增：防機器人數學驗證區塊 */}
       <div className="bg-neutral-950 p-4 border border-neutral-800 flex items-center justify-between">
         <label className="text-sm text-neutral-400">
           為防機器人，請回答：<span className="text-white font-medium ml-1 tracking-widest">{captcha.num1} + {captcha.num2} = ?</span>
         </label>
         <input 
           type="number" required
-          className={`w-20 bg-neutral-900 border p-2 text-center focus:outline-none transition-colors ${captchaError ? 'border-red-500 focus:border-red-500' : 'border-neutral-700 focus:border-white'}`}
+          // ✅ 修復：加入了 text-white
+          className={`w-20 bg-neutral-900 border p-2 text-white text-center focus:outline-none transition-colors ${captchaError ? 'border-red-500 focus:border-red-500' : 'border-neutral-700 focus:border-white'}`}
           value={userAnswer} onChange={e => {
             setUserAnswer(e.target.value);
-            setCaptchaError(false); // 使用者重新輸入時清除錯誤提示
+            setCaptchaError(false); 
           }}
         />
       </div>
