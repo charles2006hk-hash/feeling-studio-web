@@ -1,7 +1,7 @@
 // src/components/InquiryForm.tsx
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { collection, addDoc } from 'firebase/firestore'; 
 import { db } from '@/lib/firebase';
 
@@ -12,24 +12,59 @@ export default function InquiryForm() {
     category: '藝術品/商品拍攝',
     details: ''
   });
+  
   const [status, setStatus] = useState<'idle'|'submitting'|'success'|'error'>('idle');
+
+  // ✅ 防機器人驗證碼狀態
+  const [captcha, setCaptcha] = useState({ num1: 0, num2: 0 });
+  const [userAnswer, setUserAnswer] = useState('');
+  const [captchaError, setCaptchaError] = useState(false);
+
+  // 載入時產生隨機數學題
+  useEffect(() => {
+    generateCaptcha();
+  }, []);
+
+  const generateCaptcha = () => {
+    setCaptcha({
+      num1: Math.floor(Math.random() * 10) + 1, // 1~10 的隨機數
+      num2: Math.floor(Math.random() * 10) + 1
+    });
+    setUserAnswer('');
+    setCaptchaError(false);
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // ✅ 驗證防機器人答案
+    if (parseInt(userAnswer) !== captcha.num1 + captcha.num2) {
+      setCaptchaError(true);
+      return; // 答案錯誤，停止發送
+    }
+
     setStatus('submitting');
+    setCaptchaError(false);
     
     try {
-      // 將資料寫入 Firestore 的 'inquiries' 集合
+      // 1. 將資料寫入 Firestore
       await addDoc(collection(db, 'inquiries'), {
         ...formData,
-        status: 'pending', // 預設處理狀態
+        status: 'pending',
         createdAt: new Date()
+      });
+
+      // 2. 呼叫 API 發送 Email 提醒 (若您有按照上一步設定 Resend 的話)
+      await fetch('/api/send', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData),
       });
       
       setStatus('success');
       setFormData({ name: '', contact: '', category: '藝術品/商品拍攝', details: '' });
+      generateCaptcha(); // 成功後重置驗證碼
       
-      // 3秒後恢復初始狀態
       setTimeout(() => setStatus('idle'), 3000);
     } catch (error) {
       console.error("Error submitting form: ", error);
@@ -79,13 +114,29 @@ export default function InquiryForm() {
           value={formData.details} onChange={e => setFormData({...formData, details: e.target.value})}
         ></textarea>
       </div>
+
+      {/* ✅ 新增：防機器人數學驗證區塊 */}
+      <div className="bg-neutral-950 p-4 border border-neutral-800 flex items-center justify-between">
+        <label className="text-sm text-neutral-400">
+          為防機器人，請回答：<span className="text-white font-medium ml-1 tracking-widest">{captcha.num1} + {captcha.num2} = ?</span>
+        </label>
+        <input 
+          type="number" required
+          className={`w-20 bg-neutral-900 border p-2 text-center focus:outline-none transition-colors ${captchaError ? 'border-red-500 focus:border-red-500' : 'border-neutral-700 focus:border-white'}`}
+          value={userAnswer} onChange={e => {
+            setUserAnswer(e.target.value);
+            setCaptchaError(false); // 使用者重新輸入時清除錯誤提示
+          }}
+        />
+      </div>
+      {captchaError && <p className="text-red-500 text-xs text-right mt-1">驗證碼錯誤，請重新計算。</p>}
       
       {status === 'error' && <p className="text-red-500 text-sm">系統發生錯誤，請稍後再試或直接聯絡我們。</p>}
       
       <button 
         type="submit" 
         disabled={status === 'submitting' || status === 'success'}
-        className="w-full bg-neutral-100 text-neutral-950 py-4 font-medium tracking-wider hover:bg-neutral-300 transition-colors disabled:opacity-50"
+        className="w-full bg-neutral-100 text-neutral-950 py-4 mt-2 font-medium tracking-wider hover:bg-neutral-300 transition-colors disabled:opacity-50"
       >
         {status === 'submitting' ? '發送中...' : status === 'success' ? '已成功送出！' : '發送需求'}
       </button>
