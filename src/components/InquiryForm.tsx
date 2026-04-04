@@ -61,20 +61,53 @@ export default function InquiryForm() {
       setFormData({ name: '', contact: '', category: '藝術品/商品拍攝', details: '' });
       generateCaptcha();
       
-      setTimeout(() => setStatus('idle'), 3000);
+      // ✅ 延長至 5 秒，讓客戶有充足時間閱讀感謝訊息
+      setTimeout(() => setStatus('idle'), 5000);
     } catch (error) {
       console.error("Error submitting form: ", error);
       setStatus('error');
     }
   };
 
+  // ==========================================
+  // ✅ 新增：成功送出後的「高質感感謝畫面」
+  // ==========================================
+  if (status === 'success') {
+    return (
+      <div className="flex flex-col items-center justify-center space-y-6 bg-neutral-900/50 border border-neutral-800 p-8 min-h-[500px] transition-all duration-500 ease-in-out">
+        {/* 打勾圓圈圖示 */}
+        <div className="w-20 h-20 rounded-full border border-neutral-700 flex items-center justify-center bg-neutral-950 mb-4 shadow-[0_0_30px_rgba(255,255,255,0.03)]">
+          <svg className="w-10 h-10 text-neutral-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M5 13l4 4L19 7"></path>
+          </svg>
+        </div>
+        
+        {/* 感謝文字 */}
+        <h3 className="text-2xl font-light tracking-[0.15em] text-white">感謝諮詢</h3>
+        <p className="text-neutral-400 font-light tracking-wide text-center">
+          我們會盡快回覆你！
+        </p>
+        
+        {/* 視覺分隔線 */}
+        <div className="w-12 h-px bg-neutral-700 my-6"></div>
+        
+        {/* 品牌署名 */}
+        <p className="text-yellow-600 tracking-[0.2em] uppercase text-sm font-light">
+          Feeling Studio
+        </p>
+      </div>
+    );
+  }
+
+  // ==========================================
+  // 原始表單畫面 (維持不變)
+  // ==========================================
   return (
     <form onSubmit={handleSubmit} className="space-y-5">
       <div>
         <label className="block text-sm text-neutral-400 mb-2">私人或公司名稱</label>
         <input 
           type="text" required
-          // ✅ 修復：加入了 text-white
           className="w-full bg-neutral-900 border border-neutral-700 p-3 text-white focus:outline-none focus:border-white transition-colors"
           value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})}
         />
@@ -83,7 +116,6 @@ export default function InquiryForm() {
         <label className="block text-sm text-neutral-400 mb-2">聯絡電話或 Email</label>
         <input 
           type="text" required
-          // ✅ 修復：加入了 text-white
           className="w-full bg-neutral-900 border border-neutral-700 p-3 text-white focus:outline-none focus:border-white transition-colors"
           value={formData.contact} onChange={e => setFormData({...formData, contact: e.target.value})}
         />
@@ -91,7 +123,6 @@ export default function InquiryForm() {
       <div>
         <label className="block text-sm text-neutral-400 mb-2">需要攝影的類別</label>
         <select 
-          // ✅ 修復：加入了 text-white
           className="w-full bg-neutral-900 border border-neutral-700 p-3 text-white focus:outline-none focus:border-white transition-colors appearance-none"
           value={formData.category} 
           onChange={e => setFormData({...formData, category: e.target.value})}
@@ -109,7 +140,6 @@ export default function InquiryForm() {
         <label className="block text-sm text-neutral-400 mb-2">大概要求與細節</label>
         <textarea 
           rows={4} required
-          // ✅ 修復：加入了 text-white
           className="w-full bg-neutral-900 border border-neutral-700 p-3 text-white focus:outline-none focus:border-white transition-colors resize-none"
           value={formData.details} onChange={e => setFormData({...formData, details: e.target.value})}
         ></textarea>
@@ -121,7 +151,6 @@ export default function InquiryForm() {
         </label>
         <input 
           type="number" required
-          // ✅ 修復：加入了 text-white
           className={`w-20 bg-neutral-900 border p-2 text-white text-center focus:outline-none transition-colors ${captchaError ? 'border-red-500 focus:border-red-500' : 'border-neutral-700 focus:border-white'}`}
           value={userAnswer} onChange={e => {
             setUserAnswer(e.target.value);
@@ -135,10 +164,10 @@ export default function InquiryForm() {
       
       <button 
         type="submit" 
-        disabled={status === 'submitting' || status === 'success'}
+        disabled={status === 'submitting'}
         className="w-full bg-neutral-100 text-neutral-950 py-4 mt-2 font-medium tracking-wider hover:bg-neutral-300 transition-colors disabled:opacity-50"
       >
-        {status === 'submitting' ? '發送中...' : status === 'success' ? '已成功送出！' : '發送需求'}
+        {status === 'submitting' ? '發送中...' : '發送需求'}
       </button>
     </form>
   );
