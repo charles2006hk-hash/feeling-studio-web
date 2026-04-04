@@ -11,7 +11,7 @@ export async function POST(request: Request) {
     // 發送郵件
     const data = await resend.emails.send({
       from: 'Feeling Studio <onboarding@resend.dev>', // 驗證網域後可改用您的網域
-      to: ['您的電子信箱@gmail.com'], // 接收提醒的信箱
+      to: ['charles2006hk@gmail.com'], // 接收提醒的信箱
       subject: `🔔 新詢問單：來自 ${name} 的攝影需求`,
       html: `
         <div style="font-family: sans-serif; color: #333; max-width: 600px; border: 1px solid #eee; padding: 20px;">
