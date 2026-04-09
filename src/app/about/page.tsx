@@ -33,8 +33,8 @@ export default function AboutPage() {
         <div className="grid md:grid-cols-12 gap-16 items-start">
           
           {/* 左側照片 */}
-          <div className="md:col-span-5 sticky top-32">
-            <div className="relative h-[600px] w-full bg-neutral-900 overflow-hidden rounded-sm border border-neutral-800 shadow-2xl">
+          <div className="md:col-span-5 md:sticky md:top-32 mb-8 md:mb-0">
+            <div className="relative h-[400px] md:h-[600px] w-full bg-neutral-900 overflow-hidden rounded-sm border border-neutral-800 shadow-2xl">
               <Image 
                 src="/images/mak.jpg" 
                 alt="Mak" 
