@@ -34,12 +34,19 @@ export default function AboutPage() {
           
           {/* 左側照片 */}
           <div className="md:col-span-5 md:sticky md:top-32 mb-8 md:mb-0">
-            <div className="relative h-[400px] md:h-[600px] w-full bg-neutral-900 overflow-hidden rounded-sm border border-neutral-800 shadow-2xl">
+            {/* 💡 關鍵修改：移除固定高度，改用 aspect-square 讓正方形照片完美呈現 */}
+            <div className="relative aspect-square w-full bg-neutral-900 overflow-hidden rounded-sm border border-neutral-800 shadow-2xl">
               <Image 
-                src="/images/mak.jpg" 
+                src="/images/mak.jpeg" /* 請確認這裡的檔名與您上傳的一致 */
                 alt="Mak" 
                 fill
-                className="object-cover object-center grayscale hover:grayscale-0 transition-all duration-1000"
+                /* * 💡 視覺效果建議：
+                 * 這張照片本身的色彩很好看（藍色瓶子與綠色草地）。
+                 * 我幫您把原本的「黑白轉彩色 (grayscale)」拿掉，
+                 * 改成「滑鼠游標移過去時，照片微微放大」的質感動畫 (hover:scale-105)。
+                 * 如果您還是喜歡原來的黑白效果，可以把 className 換回原本的。
+                 */
+                className="object-cover object-center transition-transform duration-1000 hover:scale-105"
                 priority
               />
             </div>
